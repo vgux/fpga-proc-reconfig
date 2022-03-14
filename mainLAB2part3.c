@@ -13,23 +13,20 @@ uint32_t sevenSegmentsDisplayConverter(uint32_t value);
 
 int main (void)
 {
+	uint32_t sum = 0;
 	*ledR = 0;
 	*ledG = 0;
 	*pushbutton_edge_capture = 0;
 
-	//*HEX = 0x3F3F3F3F;
-	*HEX = sevenSegmentsDisplayConverter(0);
-
 	while(1) {
 		*ledG = *switches;
+		*ledR = sum;
+		*HEX = sevenSegmentsDisplayConverter(*ledR);
+
 		if(*pushbutton_edge_capture & 2) {
-			*ledR += *switches;
-
-			*HEX = sevenSegmentsDisplayConverter(*ledR);
-
+			sum += *switches;
 			*pushbutton_edge_capture = 0;
 		}
-	
 	}
 }
 
