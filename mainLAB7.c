@@ -3,6 +3,7 @@
 
 void drawLine (uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void drawPixel(int16_t x, int16_t y);
+uint32_t offsetCalculator(uint16_t x, uint16_t y);
 
 int main (void)
 {
@@ -67,4 +68,14 @@ void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
 void drawPixel(int16_t x, int16_t y)
 {
 	int a;
+}
+
+uint32_t offsetCalculator(uint16_t x, uint16_t y)
+{
+	uint32_t offset = 0;
+
+	offset += (y & 0xFF) << 10;
+	offset += (x & 0x3FF) << 1;
+
+	return offset;
 }
