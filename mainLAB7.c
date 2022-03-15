@@ -1,20 +1,45 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void drawLine (uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
+#define PIXEL_BUFFER_BASE_ADDRESS (volatile uint16_t *) 0x08000000
+
+#define WHITE_COLOR	0xFFFF
+#define BLACK_COLOR 0x0000
+#define PURPLE_COLOR 0xF81F
+#define CHARTREUSE_COLOR 0x7FE0
+
+void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1);
+void drawPixelColor(int16_t x, int16_t y, uint16_t color);
 void drawPixel(int16_t x, int16_t y);
 uint32_t offsetCalculator(uint16_t x, uint16_t y);
 
 int main (void)
 {
+	uint16_t x = 0;
+	uint16_t y = 0;
+	for(x = 0; x < 320; x++) {
+		for(y = 0; y < 240; y++) {
+			drawPixel(x, y);
+		}
+	}
 
+	/*
+	//Draw white pixels
+	for(y = 0; y < 240; y++) {
+		for(x = 0; x < 320; x++) {
+			*(PIXEL_BUFFER_BASE_ADDRESS + (y<<9) + x) = 0xFFFF;
+		}
+	}
+	*/
+	drawLine(0,319,0,239);
+	drawLine(319,0,0,239);
 
-
+	return 0;
 }
 
 void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
 {
-	int16_t buf;
+	int16_t buf = 0;
 	int8_t isSteep = abs(y1 - y0) > abs(x1 - x0);
 	if (isSteep) {
 		buf = x0;
@@ -40,6 +65,7 @@ void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
 	int16_t error = -(deltax /2);
 	int16_t y = y0;
 	int8_t yStep = 0;
+
 	if(y0 < y1) {
 		yStep = 1;
 	} else {
@@ -49,9 +75,9 @@ void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
 	int16_t x = 0;
 	for(x = x0; x < x1; x++) {
 		if(isSteep) {
-			drawPixel(y,x);
+			drawPixelColor(y,x, CHARTREUSE_COLOR);
 		} else {
-			drawPixel(x,y);
+			drawPixelColor(x,y, CHARTREUSE_COLOR);
 		}
 		
 		error = error + deltay;
@@ -65,17 +91,17 @@ void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
 
 }
 
+void drawPixelColor(int16_t x, int16_t y, uint16_t color)
+{
+	*(PIXEL_BUFFER_BASE_ADDRESS + offsetCalculator(x,y)) = color;
+}
+
 void drawPixel(int16_t x, int16_t y)
 {
-	int a;
+	*(PIXEL_BUFFER_BASE_ADDRESS + offsetCalculator(x,y)) = WHITE_COLOR;
 }
 
 uint32_t offsetCalculator(uint16_t x, uint16_t y)
 {
-	uint32_t offset = 0;
-
-	offset += (y & 0xFF) << 10;
-	offset += (x & 0x3FF) << 1;
-
-	return offset;
+	return (y<<9) + x;
 }
