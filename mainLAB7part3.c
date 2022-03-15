@@ -19,7 +19,7 @@
 #define LINE_NUMBER 4
 
 
-void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1);
+void drawLine (int16_t x0, int16_t x1, int16_t y0, int16_t y1);
 void drawPixelColor(int16_t x, int16_t y, uint16_t color);
 void drawPixel(int16_t x, int16_t y);
 uint32_t offsetCalculator(uint16_t x, uint16_t y);
@@ -43,9 +43,12 @@ int main (void)
 
 	srand(NULL);
 	uint8_t i = 0;
+
 	for(i = 0; i<LINE_NUMBER; i++) {
 		posX[i] = rand() % X_MAX;
 		posY[i] = rand() % Y_MAX;
+		dirLinesX[i] = (rand() % 2) -1;
+		dirLinesY[i] = (rand() % 2) -1;
 	}
 
 	while(1) {
@@ -71,39 +74,34 @@ int main (void)
 			} else if (posY[i] < 0) {
 				posY[i] = 0;
 			}
-
-
 		}
 
 		drawLineColor(posX[0], posX[1], posY[0], posY[1], WHITE_COLOR);
 		drawLineColor(posX[1], posX[2], posY[1], posY[2], BLUE_COLOR);
 		drawLineColor(posX[2], posX[3], posY[2], posY[3], CHARTREUSE_COLOR);
 		drawLineColor(posX[3], posX[0], posY[3], posY[0], PURPLE_COLOR);
-		
-
 
 		for(i = 0; i<LINE_NUMBER; i++) {
 			if(posY[i] == Y_MAX) {
-				dirLinesY[i] = -dirLinesY[i];
+				dirLinesY[i] = (rand() % 2) -1;
 			} else if(posY[i] == 0) {
-				dirLinesY[i] = -dirLinesY[i];
+				dirLinesY[i] = (rand() % 2) -1;
 			}
 
 			if(posX[i] == X_MAX) {
-				dirLinesX[i] = -dirLinesX[i];
+				dirLinesX[i] = (rand() % 2) -1;
 			} else if(posY[i] == 0) {
-				dirLinesX[i] = -dirLinesX[i];
+				dirLinesX[i] = (rand() % 2) -1;
 			}
 		}
 	
 		while((*PIXEL_STATUS_REGISTER) & 1 != 0);
 	}
 
-
 	return 0;
 }
 
-void drawLineColor (int16_t x0, int16_t x1, uint16_t y0, int16_t y1, uint16_t color)
+void drawLineColor (int16_t x0, int16_t x1, int16_t y0, int16_t y1, uint16_t color)
 {
 	int16_t buf = 0;
 	int8_t isSteep = abs(y1 - y0) > abs(x1 - x0);
@@ -155,7 +153,7 @@ void drawLineColor (int16_t x0, int16_t x1, uint16_t y0, int16_t y1, uint16_t co
 	}
 }
 
-void drawLine (int16_t x0, int16_t x1, uint16_t y0, int16_t y1)
+void drawLine (int16_t x0, int16_t x1, int16_t y0, int16_t y1)
 {
 	int16_t buf = 0;
 	int8_t isSteep = abs(y1 - y0) > abs(x1 - x0);
