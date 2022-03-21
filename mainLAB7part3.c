@@ -2,9 +2,14 @@
 #include <stdlib.h> 
 #include <stdint.h>
 
-#define PIXELMAP_BASE_ADRESS	(volatile uint16_t*)	0x08000000
+#define FRONT_PIXELMAP_BASE_ADDRESS	(volatile uint16_t*)	0x08000000
+#define BACK_PIXELMAP_BASE_ADDRESS 	(volatile uint16_t*)	0x08040000
+
 #define STATUS_REGISTER 		(volatile uint16_t*)	0x1000302C
 #define FRONT_BUFFER_REGISTER   (volatile uint16_t*)	0x10003020
+
+#define FRONT_BUFFER_ADDRESS	(volatile uint16_t**)	0x10003020
+#define BACK_BUFFER_ADDRESS		(volatile uint16_t**)	0x10003024
 
 #define X_MAX                  320 
 #define Y_MAX                  240
@@ -16,7 +21,7 @@
 #define GREEN_COLOR            0x7E00
 #define BLUE_COLOR             0x001F
 #define COLOR_NUMBER           6
-#define NODE_NUMBER             10
+#define NODE_NUMBER            10
 
 
 void drawPixelColor(uint16_t x, uint16_t y, uint16_t color);
@@ -41,20 +46,24 @@ int main(void)
 	node_t node_array[NODE_NUMBER];
 	
 	drawBackgroundColor(BLACK_COLOR);
-	
+
+	*BACK_BUFFER_ADDRESS = BACK_PIXELMAP_BASE_ADDRESS;
+
 	for(node_index = 0; node_index < NODE_NUMBER; node_index++)
 	{
 		node_array[node_index].xCoord = rand() % X_MAX;
 		node_array[node_index].yCoord = rand() % Y_MAX;
 	}
 	
+
 	while(1)
 	{
 		// Wait next write cycle
-		*FRONT_BUFFER_REGISTER = 1;
-		while ((*STATUS_REGISTER & 1) !=0);
 		
 		
+		drawBackgroundColor(BLACK_COLOR);
+
+
 		// ERASE figure
 		for(node_index = 0; node_index < NODE_NUMBER; node_index++)
 		{
@@ -105,6 +114,9 @@ int main(void)
 						  node_array[(node_index + 1) % NODE_NUMBER].yCoord, 
 						  PURPLE_COLOR);
 		}
+
+		*FRONT_BUFFER_REGISTER = 1;
+		while ((*STATUS_REGISTER & 1) != 0);
 	}
 }
 
@@ -174,7 +186,7 @@ void drawLineColor(int x0, int x1, int y0, int y1, int color)
 
 void drawPixelColor(uint16_t x, uint16_t y, uint16_t color)
 {
-	*(PIXELMAP_BASE_ADRESS + ((y<<9) + x)) = color;
+	*(*BACK_BUFFER_ADDRESS + ((y<<9) + x)) = color;
 }
 
 void drawBackgroundColor(uint16_t color)
